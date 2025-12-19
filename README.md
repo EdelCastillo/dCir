@@ -10,7 +10,7 @@ It is a hardware-focused simulator that visualizes how information flows through
 
 ![Finite state machine](./FSM_2b.png)
 
-### **Project creation **
+### Project creation 
 >To simulate a circuit, a project is required. The application provides the means to do this. Everything revolves around
 a drawing containing the elements of the digital circuit. This drawing can be generated with any graphics application;
 the .png and .jpg formats are accepted. The important elements of the drawing are the constituent blocks (gates, flip-flops, etc.)
@@ -19,15 +19,15 @@ and their interconnections; any other element is considered purely aesthetic. Th
 >The next step in generating the project is to transfer the content of the drawing to the application.
 
 
-### **Simulation **
+### Simulation 
 >After loading the project, it can be simulated. Operating conditions are set (input values, flip-flop initialization, etc.)
 and the circuit's progress is displayed. All flip-flops operate with the same clock and are controlled manually.
 
-### **Configuration **
+### Configuration 
 >Different operating parameters related to information display can be configured, such as
 the speed of information propagation through the circuit, colors, labels, etc.
 
-### **Exemples ** 
+### Exemples  
 >A series of examples are attached to help you get started quickly with the simulation. One of them is the "simple machine".
 This is a small microcomputer system with all its supporting elements: memory management, assembler, peripherals, etc.
 
