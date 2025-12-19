@@ -33,9 +33,6 @@ This is a small microcomputer system with all its supporting elements: memory ma
 
 >[examples](./Examples.zip).
 
-## Installation
-
-> devtools::install_github("EdelCastillo/dCir")
 
 > Please note that is a development version and no release has been made yet. So, keep looking at this page for future updates and releases.
 
