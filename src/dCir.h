@@ -49,7 +49,7 @@ class Gui : public QMainWindow
              
 private slots:
       void quit();              //termina la aplicación
-      int  openProject();       //abre el proyecto desde fichero
+      int  openProject(bool newProject=true);       //abre el proyecto desde fichero
       int  saveProject();       //guarda el proyecto en un fichero
       void closeProject();      //cierra el proyecto actual
       void bottonLeftAttn();    //atiende a la pulsación del botón izquierdo del ratón

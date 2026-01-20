@@ -28,11 +28,15 @@
 class Gui *extGui_p;  //usada por mouse.cpp para lanzar eventos a Gui
 
 #define MAX_IMAGES 100
+bool gEdit;     //se hace true si se crea un nuevo camino o bloque. Fuerza a una reinicialización completa.
+bool gPrjSaved;  //true si se ha guardado el proyecto
 
 Gui::Gui(int argc, char **argv) 
 { 
     extGui_p=this;
     m_activeProject = false;
+    gEdit = false;
+    gPrjSaved = true;
 
     //menú principal
     projectMenu = menuBar()->addMenu(tr("&Project"));
@@ -265,7 +269,13 @@ int Gui::getArrowSize(QPolygonF *arrow)
 void Gui::quit()
 {
     if (m_activeProject)
+    {
+        if (gEdit && !gPrjSaved)
+        {
+            if(saveProject()!=-1) gPrjSaved = true;
+        }
         closeProject();
+    }
    qApp->quit();     
 }
 
@@ -500,7 +510,7 @@ void Gui::memoryList(int addrInit, int addrEnd)
 void Gui::version()
 {
          QMessageBox::information( this, "Version",
-                                            "version: 1.5.2, November 2025",
+                                            "version: 1.5.3, January 2026",
                                             QMessageBox::Close);
 }
 
@@ -517,10 +527,21 @@ void Gui::startSimulation()
 {
     if (!m_activeProject)
     {
-        QMessageBox::warning(this, "dCir", "Warning: no project loaded",
-            QMessageBox::Close);
-        return;
+         QMessageBox::warning(this, "dCir", "Warning: no project loaded",
+         QMessageBox::Close);
+         return;
     }
+
+    //gEdit (variable global) se hace true si se crea un nuevo camino o bloque
+    if (gEdit) //si se ha modificado el circuito digital. Requiere de inicialización completa
+    {
+        if (!gPrjSaved) {
+            if(saveProject()!=-1) gPrjSaved = true;
+        }
+        openProject(false); //no es un proyecto nuevo.
+        gEdit = false; 
+    }
+
     if(!isAllOK()) return;
     m_startSimulation=true; //flag de comienzo de simulación
     m_pauseSimulation=false; //flag de pausa
@@ -870,26 +891,28 @@ void Gui::newProject()
 }
 
 //carga de un proyecto ya existente
-int Gui::openProject()
+int Gui::openProject(bool newProject)
 {
     Common tools;
     char txt[200];
-    if (strlen(m_projectDir) > 3)  //si se ha inicializado
-        strcpy(txt, m_projectDir);
-    else
-        strcpy(txt, (char*)"\\");
-    FileNameDialog fileDiag((char*)"- open project -", txt); //diálogo
-    fileDiag.exec();
-    if (fileDiag.m_accept == 0) return -1;
-
-    tools.QlineEditToChar(fileDiag.fileValue, m_projectName); //nombre del proyecto
-    if(!tools.existFile(m_projectName))
+    if (newProject) //nuevo proyecto: requiere de info
     {
-        sprintf(txt, "Warning: the %s file does not exist", m_projectName);
-        QMessageBox::warning(this, "Project information", txt, QMessageBox::Close);
-        return -1;
-    }
+        if (strlen(m_projectDir) > 3)  //si se ha inicializado
+            strcpy(txt, m_projectDir);
+        else
+            strcpy(txt, (char*)"\\");
+        FileNameDialog fileDiag((char*)"- open project -", txt); //diálogo
+        fileDiag.exec();
+        if (fileDiag.m_accept == 0) return -1;
 
+        tools.QlineEditToChar(fileDiag.fileValue, m_projectName); //nombre del proyecto
+        if (!tools.existFile(m_projectName))
+        {
+            sprintf(txt, "Warning: the %s file does not exist", m_projectName);
+            QMessageBox::warning(this, "Project information", txt, QMessageBox::Close);
+            return -1;
+        }
+    }
     m_timer->stop();                            //se detiene el tiempo
     while (m_timerEvent);                        //espera a la conclusión en background
 
@@ -1014,12 +1037,12 @@ int Gui::saveProject()
                                             QMessageBox::Yes);
         if (fp) fclose(fp);
         if (resBtn != QMessageBox::Yes)
-            return 0;
+            return -1; //no se salva
         }
     
     Project project(this);
     if(project.saveProject()==-1) return -1; //se guarda
-    
+    gPrjSaved = true; //prj salvado
     return 0;
 }
 

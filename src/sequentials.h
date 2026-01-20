@@ -48,7 +48,9 @@ public:
     //Gestion de tabla de la verdad para FSM
     void FSM(int bk);
 
-    
+    //Gestion de tabla de la verdad para FSM en caso de cambio la entrada (Mealy)
+    void FSM_out(int bk);
+
     BLOCK           *m_blocks_p;    //puntero a estructura BLOCK
     PATH            *m_paths_p;     //puntero a estructura PATH
     class Blocks    *m_cBlocks_p;   //puntero a clase Blocks

@@ -523,11 +523,13 @@ void  Blocks::evaluateBlocks()
 {
     for(int bk=0; bk<MAX_BLOCKS; bk++) //para cada bloque
         {
+        if (bk == 0 && m_blocks_p[bk].currentDelay > 0)
+            printf("...\n");
         //control de tiempos en bloque combinacional
         //se decrementa el contador y, cuando se anula, se actua sobre la salida
         //Los latch se evaluan como combinacionales, al carecer de reloj.
         if(existBlock(bk) && (m_blocks_p[bk].type== (char)Type::COMBI || m_blocks_p[bk].type== (char)Type::MEMORY || 
-            (m_blocks_p[bk].type== (char)Type::SEQ && m_blocks_p[bk].FF.type== (char)FF::LATCH))
+            (m_blocks_p[bk].type== (char)Type::SEQ && m_blocks_p[bk].FF.type== (char)FF::LATCH ))
             && m_blocks_p[bk].currentDelay>0 && --m_blocks_p[bk].currentDelay==0)
             {
             if(m_blocks_p[bk].nPathOut>0) //módulo con varias salidas
@@ -561,8 +563,6 @@ void  Blocks::evaluateBlocks()
         if(m_pathsNews[path].news==true) //si hay novedad en la entrada a algún bloque
             {
             int block=m_pathsNews[path].block;  //bloque que debe ser evaluado
-//            if(block==19)
-//                if (!existBlock(block)) continue;
 
             if(!existBlock(block)) continue;
             
@@ -570,9 +570,13 @@ void  Blocks::evaluateBlocks()
             if(m_blocks_p[block].type== (char)Type::SEQ && m_blocks_p[block].FF.type== (char)FF::LATCH)
                 {
                 m_sequ_p->LATCH(block);
-                m_pathsNews[path].news=false;
                 }
-            
+            //caso especial de FSM Mealy: se debe actaulizar la salida si hay cambios en la entrada
+            if (m_blocks_p[block].type == (char)Type::SEQ && m_blocks_p[block].FF.type == (char)FF::FSM)
+            {
+                m_sequ_p->FSM_out(block);
+            }
+
             char type=m_blocks_p[block].type;   //tipo de bloque
             switch(type)
                 {
@@ -624,35 +628,30 @@ void  Blocks::evaluateBlocks()
                             m_combi_p->OTHERS(block);
                             break;
                         }
-                    m_pathsNews[path].news=false;
+                    //m_pathsNews[path].news=false;
                     }
                     break;
                 case (char)Type::NODE:
                     {
                     m_combi_p->NODE(block);
-                    m_pathsNews[path].news=false;
                     }
                     break;
                 case (char)Type::TAB:
                     {
                     m_combi_p->TAB(block);
-                    m_pathsNews[path].news=false;
                     }
                     break;
                 case (char)Type::IN_PORT:
                     {
-                    m_pathsNews[path].news=false;
                     }
                     break;
                 case (char)Type::OUT_PORT:
                     {
-                    m_pathsNews[path].news=false;
                     }
                     break;
                 case (char)Type::MEMORY:
                     {
                     m_combi_p->MEMORY(block, 0);
-                    m_pathsNews[path].news=false;
                     }
                     break;
 //                case LATCH:
@@ -662,6 +661,7 @@ void  Blocks::evaluateBlocks()
                 
                 }
             }
+        m_pathsNews[path].news = false;
         }
     //Los bloque secuenciales no son sensibles al cambio en la información del camino sino al clock        
     for(int bk=0; bk<MAX_BLOCKS; bk++) //para cada bloque

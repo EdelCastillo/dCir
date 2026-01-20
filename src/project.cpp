@@ -138,7 +138,7 @@ int Project::saveProject()
 {
     FILE *fp=0;
     int ret; 
-    char errMessage[100];
+    char errMessage[200];
     char txt[200], txt2[200];
     Common tools;
     const char *blockType[]={"COMBI", "SEQ", "NODE", "IN_PORT", "OUT_PORT", "TAB", "MEMORY"};

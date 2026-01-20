@@ -44,11 +44,11 @@ void Sequentials::FFD(int bk)
         
     unKnowOld=m_blocks_p[bk].FF.valueOutUnknow;
     m_blocks_p[bk].FF.valueOutUnknow=unKnow;    //salida ='x' si entrada = 'x'
-    if(unKnowOld!=unKnow || tmp!=output)                             //si hay cambios en la salida
+    if(unKnowOld!=unKnow || tmp!=output)        //si hay cambios en la salida
         {
         m_blocks_p[bk].FF.valueOut=tmp;         //actualización de salida  
         pathOut=m_blocks_p[bk].pathOut[0];
-        m_cBlocks_p->startPath(pathOut, tmp, unKnow);                //copia a la entrada del camino de salida y activación
+        m_cBlocks_p->startPath(pathOut, tmp, unKnow); //copia a la entrada del camino de salida y activación
         }   
     else
         m_blocks_p[bk].FF.start=false;          //sin cambios
@@ -70,11 +70,11 @@ void Sequentials::FFT(int bk)
         
     unKnowOld=m_blocks_p[bk].FF.valueOutUnknow;
     m_blocks_p[bk].FF.valueOutUnknow=unKnow;    //salida ='x' si entrada = 'x'
-    if(unKnowOld!=unKnow || tmp!=output)                             //si hay cambios en la salida
+    if(unKnowOld!=unKnow || tmp!=output)        //si hay cambios en la salida
         {
         m_blocks_p[bk].FF.valueOut=tmp;         //actualización de salida  
         pathOut=m_blocks_p[bk].pathOut[0];
-        m_cBlocks_p->startPath(pathOut, tmp, unKnow);                //copia a la entrada del camino de salida y activación
+        m_cBlocks_p->startPath(pathOut, tmp, unKnow); //copia a la entrada del camino de salida y activación
         }   
     else
         m_blocks_p[bk].FF.start=false;          //sin cambios
@@ -109,16 +109,16 @@ void Sequentials::FFJK(int bk)
             else tmp&=mask2;                        //si '0', se fuerza '0' en el peso correspondiente
             mask<<=1;  mask2|=mask;                 //se adecuan las máscaras
             }
-        if(unKnow1==true || unKnow2==true) unKnow=true;         //J o K valen 'x', salida 'x'
+        if(unKnow1==true || unKnow2==true) unKnow=true; //J o K valen 'x', salida 'x'
         else unKnow=false;
         
     unKnowOld=m_blocks_p[bk].FF.valueOutUnknow;
     m_blocks_p[bk].FF.valueOutUnknow=unKnow;    //salida ='x' si entrada = 'x'
-    if(unKnowOld!=unKnow || tmp!=output)                             //si hay cambios en la salida
+    if(unKnowOld!=unKnow || tmp!=output)        //si hay cambios en la salida
         {
         m_blocks_p[bk].FF.valueOut=tmp;         //actualización de salida  
         pathOut=m_blocks_p[bk].pathOut[0];
-        m_cBlocks_p->startPath(pathOut, tmp, unKnow);                //copia a la entrada del camino de salida y activación
+        m_cBlocks_p->startPath(pathOut, tmp, unKnow); //copia a la entrada del camino de salida y activación
         }   
     else
         m_blocks_p[bk].FF.start=false;          //sin cambios
@@ -166,7 +166,7 @@ void Sequentials::FSM(int bk)
 {    
     bool hit=false;
     bool unKnow, unKnowOld;
-    int tmp, input, output, pathOut, maskOut, maskIn;
+    int tmp=0, input, output, pathOut, maskOut, maskIn;
     maskIn=m_cBlocks_p->andMask(m_paths_p[m_blocks_p[bk].pathIn[0]].nBits);
     maskOut=m_cBlocks_p->andMask(m_paths_p[m_blocks_p[bk].pathOut[0]].nBits);
     
@@ -184,14 +184,17 @@ void Sequentials::FSM(int bk)
             inputTT =m_blocks_p[bk].TT.table_p[i][1];   //entrada en TT
             mask    =m_blocks_p[bk].TT.table_p[i][2];   //máscara para valor de entrada
             statusF =m_blocks_p[bk].TT.table_p[i][3];   //estado futuro según TT
+            //conocido el estado actual, se establece el estado futuro y la salida
             if(statusTT==m_blocks_p[bk].FF.status && inputTT==(input&mask)) 
                 {
                 m_blocks_p[bk].FF.status=statusF; 
                 for(int j=0; j<m_blocks_p[bk].TT.nRows; j++) //búsqueda de coincidencias
                     {
                     statusTT=m_blocks_p[bk].TT.table_p[j][0];   //estado en TT
+                    inputTT =m_blocks_p[bk].TT.table_p[j][1];   //entrada en TT
+                    mask    =m_blocks_p[bk].TT.table_p[j][2];   //máscara para valor de entrada
                     outputTT=m_blocks_p[bk].TT.table_p[j][4];   //salida
-                    if(statusTT==m_blocks_p[bk].FF.status) 
+                    if(statusTT==m_blocks_p[bk].FF.status && inputTT == (input & mask))
                         {tmp=outputTT; hit=true; break;}                        
                     }
                 if(hit) break;
@@ -203,14 +206,64 @@ void Sequentials::FSM(int bk)
     
     unKnowOld=m_blocks_p[bk].FF.valueOutUnknow;
     m_blocks_p[bk].FF.valueOutUnknow=unKnow;    //salida ='x' si entrada = 'x'
-    if(unKnowOld!=unKnow || tmp!=output)                             //si hay cambios en la salida
+    if(unKnowOld!=unKnow || tmp!=output)        //si hay cambios en la salida
         {
         m_blocks_p[bk].FF.valueOut=tmp;         //actualización de salida  
         pathOut=m_blocks_p[bk].pathOut[0];
-        m_cBlocks_p->startPath(pathOut, tmp, unKnow);                //copia a la entrada del camino de salida y activación
+        m_cBlocks_p->startPath(pathOut, tmp, unKnow); //copia a la entrada del camino de salida y activación
         }   
     else
         m_blocks_p[bk].FF.start=false;          //sin cambios
     
+}
+
+//Gestion de tabla de la verdad para FSM en caso de cambio la entrada (Mealy)
+//Se mantiene el estado actual y se actualiza la salida, sin retardo.
+void Sequentials::FSM_out(int bk)
+{
+    bool hit = false;
+    bool unKnow, unKnowOld;
+    int tmp=0, input, output, pathOut, maskOut, maskIn;
+    maskIn = m_cBlocks_p->andMask(m_paths_p[m_blocks_p[bk].pathIn[0]].nBits);
+    maskOut = m_cBlocks_p->andMask(m_paths_p[m_blocks_p[bk].pathOut[0]].nBits);
+
+    input = m_paths_p[m_blocks_p[bk].pathIn[0]].valueEnd.value;        //valor de entrada T
+    input &= maskIn;
+    m_blocks_p[bk].FF.valueA = input;
+    m_blocks_p[bk].FF.valueAUnknow = false;
+
+    output = m_blocks_p[bk].FF.valueOut; //valor de salida actual      
+    unKnow = false;
+    int statusTT, inputTT, outputTT, mask;
+    if (unKnow == true) tmp = 0;
+    else
+    {
+        for (int i = 0; i < m_blocks_p[bk].TT.nRows; i++) //búsqueda de coincidencias
+        {
+            statusTT = m_blocks_p[bk].TT.table_p[i][0];   //estado en TT
+            inputTT = m_blocks_p[bk].TT.table_p[i][1];   //entrada en TT
+            mask = m_blocks_p[bk].TT.table_p[i][2];     //máscara para valor de entrada
+            //statusF = m_blocks_p[bk].TT.table_p[i][3];   //estado futuro según TT
+            if (statusTT == m_blocks_p[bk].FF.status && inputTT == (input & mask))
+                {
+                outputTT = m_blocks_p[bk].TT.table_p[i][4];   //salida
+                tmp = outputTT; hit = true; break;
+                }
+        }
+        if (!hit) unKnow = true;
+    }
+    tmp &= maskOut;
+
+    unKnowOld = m_blocks_p[bk].FF.valueOutUnknow;
+    m_blocks_p[bk].FF.valueOutUnknow = unKnow;    //salida ='x' si entrada = 'x'
+    if (unKnowOld != unKnow || tmp != output)     //si hay cambios en la salida
+    {
+        m_blocks_p[bk].FF.valueOut = tmp;         //actualización de salida  
+        pathOut = m_blocks_p[bk].pathOut[0];
+        m_cBlocks_p->startPath(pathOut, tmp, unKnow);  //copia a la entrada del camino de salida y activación
+    }
+    else
+        m_blocks_p[bk].FF.start = false;          //sin cambios
+
 }
 

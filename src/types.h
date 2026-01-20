@@ -32,6 +32,7 @@
 #define MAX_LINE_WORDS      20  //# máximo de palabras por línea
 #define MAX_CHARACTER_WORD  200 //# máximo de caracteres por palabra
 #define MAX_SIZE_LINE       200 //# máximo de caracteres por línea
+#define MAX_TAPS_PATH        20 //# máximo de caracteres por línea
 
 enum class Type {COMBI, SEQ, NODE, IN_PORT, OUT_PORT, TAB, MEMORY};             //tipos de bloques
 enum class Oper {NOT, AND, OR, XOR, NAND, NOR, XNOR, ADD, MUX, CMP, OTHERS, DMUX, DECOD, DECODN};    //tipos de bloques combinacionales
@@ -70,7 +71,7 @@ typedef struct{
     double  angle;                  //ángulo
     int     nDeltaSeg,              //# de flechas que puede alojar
             currentDeltaSeg;        //flecha actual
-    FORK    forks[MAX_BLOCKS_PATHS];//puntos de bifurcación en unidades de deltaSeg
+    FORK    forks[MAX_TAPS_PATH];//puntos de bifurcación en unidades de deltaSeg
     int        nForks;              //número de bifurcaciones
     QGraphicsLineItem    *lineItem; //item del segmento
     QGraphicsPolygonItem **arrowItem;//array de items para las flechas

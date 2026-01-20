@@ -20,6 +20,7 @@
  **************************************************************************/
 
 #include "dialogs.h"
+bool extern gEdit, gPrjSaved;
 
 //Constructor
 Dialogs::Dialogs(class Blocks *cBlocks_p, PARAMS *params_p)
@@ -160,7 +161,9 @@ void Dialogs::pathsAttn()
                 m_closedPath=true;                  //fin del camino
                 m_cBlocks_p->finishGetPointsPath(lastPath, lastPathBits); //toda la info capturada
                 lastPath=-1;                        //para la vez siguiente
-                }
+                gEdit = true; //variable global: indica que se ha creado algún nuevo camino (modo edición de caminos)
+                gPrjSaved = false; //proyecto no salvado
+            }
             else if(pathDialog.m_result==3 || pathDialog.m_result==4) //eliminar o cancelar el camino
                 {
                 if(m_openedPath==true)              //si el camino sigue abierto
@@ -219,7 +222,7 @@ void Dialogs::editBlock(int block)
     int pathsIn[MAX_BLOCK_IN],      //array para alojar los caminos de entrada al bloque
         pathsOut[MAX_BLOCK_IN],     //array para alojar los caminos de salida  al bloque
         pathsSelect[MAX_BLOCK_IN],  //array para alojar los caminos de selección (mux)
-        nPathsIn, nPathsOut,        //# de entradas y salidas
+        nPathsIn=0, nPathsOut=0,        //# de entradas y salidas
         nPathsSelect, pathEnable;
     BITS_PATH nodePathOut[10];
     BITS_PATH nodePathIn[10];
@@ -452,8 +455,10 @@ void Dialogs::editBlock(int block)
     blockDialog.exec(); //presentación y captura de datos
     //////////////////////////////////////////////////////////////
     
-    if(blockDialog.m_result==4 || blockDialog.m_result == 0) return;     //botón  cancel o abortar
+    gEdit = false;
 
+    if (blockDialog.m_result == 4 || blockDialog.m_result == 0) return;     //botón  cancel o abortar
+   
     //Para tratar con los posibles errores de usuario, primero se captura la información a variables temporales
     else if(blockDialog.m_result==3)        //botón  remove (eliminación del bloque)
         {
@@ -468,6 +473,10 @@ void Dialogs::editBlock(int block)
     else  if(blockDialog.m_result==1)       //botón accept
         {
         hit=false; 
+        if (newBlock) {
+            gEdit = true; //nuevo bloque añadido
+            gPrjSaved = false; //proyecto no salvado
+        }
 
         //Captura temporal de datos para poder volver atrás si algo falla
         /////////////////////////////////////////////////////////////////
@@ -611,7 +620,7 @@ void Dialogs::editBlock(int block)
                     (blockType== (char)Type::COMBI && blockDialog.Coperation->currentIndex() != (char)Oper::DECOD) &&
                     (blockType== (char)Type::COMBI && blockDialog.Coperation->currentIndex() != (char)Oper::DECODN)))
                 {
-                    sprintf(txt, "Warning: There are no input paths on the block (b(%d)", block);
+                    sprintf(txt, "Warning: There are no input paths on the block b(%d)", block);
                     QMessageBox::warning(0, "Paths", txt, QMessageBox::Cancel);
                     continue;
                 }
@@ -631,7 +640,7 @@ void Dialogs::editBlock(int block)
                 }
                 if(nPathsOut==0 && blockType!= (char)Type::OUT_PORT)
                 {
-                    sprintf(txt, "Warning: There are no output paths on the block (b(%d)", block);
+                    sprintf(txt, "Warning: There are no output paths on the block b(%d)", block);
                     QMessageBox::warning(0, "Paths", txt, QMessageBox::Cancel);
                     continue;
                 }
@@ -656,9 +665,10 @@ void Dialogs::editBlock(int block)
         break;  //info correcta-> fin de iteración
         }   
         
-    //la info considerada válida se registra 
+    //la info, considerada válida, se registra 
     ////////////////////////////////////////
-    
+    if (nPathsIn == 0 && nPathsOut == 0) return;
+
     //tratamiento específco según el tipo de bloque
     m_blocks_p[block].type=blockType;
     if(blockType== (char)Type::COMBI || blockType== (char)Type::MEMORY) //bloque combinacional

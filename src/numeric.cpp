@@ -55,7 +55,7 @@ bool Numeric::isBinary(char *txt)
 //si no contiene ningún caracter válido, retorna cero
 unsigned int Numeric::binaryToDecimal(char *txt)
 {
-    int i, j, k=0, value[8], one=1;
+    int i, j, k=0, value[16], one=1;
     unsigned int result=0;
     bool hit=false;
     
